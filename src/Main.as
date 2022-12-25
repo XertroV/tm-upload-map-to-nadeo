@@ -42,6 +42,7 @@ void UpdateMapStatus() {
     // check if the current UID is uploaded and cache result
     currMapStatus = MapStatus::NotChecked;
     if (!HasPermissions) return;
+    sleep(100);
     currMapStatus = MapStatus::Checking;
     auto app = cast<CGameManiaPlanet>(GetApp());
     while (app.MenuManager is null || app.MenuManager.MenuCustom_CurrentManiaApp is null) yield();
