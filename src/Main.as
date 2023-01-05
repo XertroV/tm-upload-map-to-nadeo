@@ -119,6 +119,7 @@ void UploadMap(const string &in uid) {
         trace("UploadMapFromLocal: Map uploaded: " + uid);
         currMapStatus = MapStatus::Uploaded;
     }
+    dfm.TaskResult_Release(regScript.Id);
 }
 
 
