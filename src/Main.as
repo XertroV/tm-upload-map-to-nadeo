@@ -118,8 +118,33 @@ void UploadMap(const string &in uid) {
     if (regScript.HasSucceeded) {
         trace("UploadMapFromLocal: Map uploaded: " + uid);
         currMapStatus = MapStatus::Uploaded;
+        startnew(RefreshRecords);
     }
     dfm.TaskResult_Release(regScript.Id);
+}
+
+
+void RefreshRecords() {
+    try {
+        // patch the maniascript so that it thinks the map is always available -- attempting to set Race_Record_MapAvailaibleOnNadeoServices did not seem to work.
+        auto cmap = GetApp().Network.ClientManiaAppPlayground;
+        for (uint i = 0; i < cmap.UILayers.Length; i++) {
+            auto layer = cmap.UILayers[i];
+            bool isRecords = layer.ManialinkPageUtf8.SubStr(0, 100).Contains('<manialink name="UIModule_Race_Record" version="3">');
+            if (!isRecords) continue;
+            // we want to replace all *usages* of the variable `_MapAvailaibleOnNadeoServices` with `True`, so temporarily replace conflicting parts of the ML code.
+            auto newML = layer.ManialinkPageUtf8
+                .Replace('Race_Record_MapAvailaibleOnNadeoServices', '__RR_MAPAVAILABLE_CLIENTUI__')
+                .Replace('Boolean _MapAvailaibleOnNadeoServices,', '__FUNC_ARG_MAPAVAILABLE__')
+                .Replace('_MapAvailaibleOnNadeoServices', 'True')
+                .Replace('__FUNC_ARG_MAPAVAILABLE__', 'Boolean _MapAvailaibleOnNadeoServices,')
+                .Replace('__RR_MAPAVAILABLE_CLIENTUI__', 'Race_Record_MapAvailaibleOnNadeoServices');
+            layer.ManialinkPage = newML;
+            break;
+        }
+    } catch {
+        warn("Failed to refresh records: " + getExceptionInfo());
+    }
 }
 
 
