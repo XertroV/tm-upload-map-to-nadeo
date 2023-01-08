@@ -1,5 +1,8 @@
-[Setting name="Auto upload on map start"]
-bool Setting_AutoUpload = false;
+[Setting name="Auto upload maps (WARNING)" description="When you load a map (outside of the editor) that is not uploaded, it will be automatically uploaded. This may have unintended consequences, however, it is probably very useful for Bingo."]
+bool S_AutoUpload = false;
+
+[Setting name="Refresh records on upload" description="This will alter the manialink for the records UI element. While this works currently, a future Nadeo update might break this feature. If you ever get script errors when the records should be refreshed, disable this setting."]
+bool S_RefreshRecords = true;
 
 string currMapUid, currMapName;
 
@@ -28,7 +31,7 @@ void Update(float dt) {
         currMapUid = app.RootMap.MapInfo.MapUid;
         currMapName = ColoredString(app.RootMap.MapInfo.Name);
         startnew(UpdateMapStatus);
-        if (Setting_AutoUpload) startnew(WaitForCheckAndAutoUploadIfNotUploaded);
+        if (S_AutoUpload) startnew(WaitForCheckAndAutoUploadIfNotUploaded);
     }
 }
 
@@ -140,6 +143,7 @@ void UploadMap(const string &in uid) {
 
 
 void RefreshRecords() {
+    if (!S_RefreshRecords) return;
     try {
         // patch the maniascript so that it thinks the map is always available -- attempting to set Race_Record_MapAvailaibleOnNadeoServices did not seem to work.
         auto cmap = GetApp().Network.ClientManiaAppPlayground;
@@ -191,7 +195,7 @@ void UploadCurrMap() {
 /** Called when a setting in the settings panel was changed.
 */
 void OnSettingsChanged() {
-    if (currMapStatus == MapStatus::NotUploaded && Setting_AutoUpload) {
+    if (currMapStatus == MapStatus::NotUploaded && S_AutoUpload) {
         startnew(WaitForCheckAndAutoUploadIfNotUploaded);
     }
 }
