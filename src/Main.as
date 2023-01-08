@@ -1,7 +1,7 @@
 [Setting name="Auto upload on map start"]
 bool Setting_AutoUpload = false;
 
-string currMapUid;
+string currMapUid, currMapName;
 
 bool HasPermissions {
     get {
@@ -22,9 +22,11 @@ void Update(float dt) {
     auto app = cast<CGameManiaPlanet>(GetApp());
     if ((app.RootMap is null && currMapUid != "")) {
         currMapUid = "";
+        currMapName = "None";
         currMapStatus = MapStatus::NoMap;
     } else if (app.RootMap !is null && app.RootMap.MapInfo.MapUid != currMapUid) {
         currMapUid = app.RootMap.MapInfo.MapUid;
+        currMapName = ColoredString(app.RootMap.MapInfo.Name);
         startnew(UpdateMapStatus);
         if (Setting_AutoUpload) startnew(WaitForCheckAndAutoUploadIfNotUploaded);
     }
@@ -80,7 +82,10 @@ void UpdateMapStatus() {
 
 void WaitForCheckAndAutoUploadIfNotUploaded() {
     while (currMapStatus == MapStatus::NotChecked || currMapStatus == MapStatus::Checking) yield();
-    if (currMapStatus == MapStatus::NotUploaded) UploadCurrMap();
+    if (currMapStatus == MapStatus::NotUploaded) {
+        Notify("Automatically uploading map to Nadeo: " + currMapName);
+        UploadCurrMap();
+    }
 }
 
 const string MapStatusText() {
@@ -126,6 +131,7 @@ void UploadMap(const string &in uid) {
     }
     if (regScript.HasSucceeded) {
         trace("UploadMapFromLocal: Map uploaded: " + uid);
+        Notify("Uploaded map: " + currMapName);
         currMapStatus = MapStatus::Uploaded;
         startnew(RefreshRecords);
     }
@@ -180,4 +186,12 @@ void RenderMenu() {
 
 void UploadCurrMap() {
     UploadMap(currMapUid);
+}
+
+/** Called when a setting in the settings panel was changed.
+*/
+void OnSettingsChanged() {
+    if (currMapStatus == MapStatus::NotUploaded && Setting_AutoUpload) {
+        startnew(WaitForCheckAndAutoUploadIfNotUploaded);
+    }
 }
