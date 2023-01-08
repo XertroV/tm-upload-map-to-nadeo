@@ -1,3 +1,6 @@
+[Setting name="Auto upload on map start"]
+bool Setting_AutoUpload = false;
+
 string currMapUid;
 
 bool HasPermissions {
@@ -23,6 +26,7 @@ void Update(float dt) {
     } else if (app.RootMap !is null && app.RootMap.MapInfo.MapUid != currMapUid) {
         currMapUid = app.RootMap.MapInfo.MapUid;
         startnew(UpdateMapStatus);
+        if (Setting_AutoUpload) startnew(WaitForCheckAndAutoUploadIfNotUploaded);
     }
 }
 
@@ -72,6 +76,11 @@ void UpdateMapStatus() {
     } else {
         currMapStatus = MapStatus::Unknown;
     }
+}
+
+void WaitForCheckAndAutoUploadIfNotUploaded() {
+    while (currMapStatus == MapStatus::NotChecked || currMapStatus == MapStatus::Checking) yield();
+    if (currMapStatus == MapStatus::NotUploaded) UploadCurrMap();
 }
 
 const string MapStatusText() {
