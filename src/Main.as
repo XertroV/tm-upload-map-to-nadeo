@@ -1,5 +1,5 @@
-[Setting name="Auto upload maps (WARNING)" description="When you load a map (outside of the editor) that is not uploaded, it will be automatically uploaded. This may have unintended consequences, however, it is probably very useful for Bingo."]
-bool S_AutoUpload = false;
+// [Setting name="Auto upload maps (WARNING)" description="When you load a map (outside of the editor) that is not uploaded, it will be automatically uploaded. This may have unintended consequences, however, it is probably very useful for Bingo."]
+// bool S_AutoUpload = false;
 
 [Setting name="Refresh records on upload" description="This will alter the manialink for the records UI element. While this works currently, a future Nadeo update might break this feature. If you ever get script errors when the records should be refreshed, disable this setting."]
 bool S_RefreshRecords = true;
@@ -31,7 +31,7 @@ void Update(float dt) {
         currMapUid = app.RootMap.MapInfo.MapUid;
         currMapName = ColoredString(app.RootMap.MapInfo.Name);
         startnew(UpdateMapStatus);
-        if (S_AutoUpload) startnew(WaitForCheckAndAutoUploadIfNotUploaded);
+        // if (S_AutoUpload) startnew(WaitForCheckAndAutoUploadIfNotUploaded);
     }
 }
 
@@ -83,13 +83,13 @@ void UpdateMapStatus() {
     }
 }
 
-void WaitForCheckAndAutoUploadIfNotUploaded() {
-    while (currMapStatus == MapStatus::NotChecked || currMapStatus == MapStatus::Checking) yield();
-    if (currMapStatus == MapStatus::NotUploaded) {
-        Notify("Automatically uploading map to Nadeo: " + currMapName);
-        UploadCurrMap();
-    }
-}
+// void WaitForCheckAndAutoUploadIfNotUploaded() {
+//     while (currMapStatus == MapStatus::NotChecked || currMapStatus == MapStatus::Checking) yield();
+//     if (currMapStatus == MapStatus::NotUploaded) {
+//         Notify("Automatically uploading map to Nadeo: " + currMapName);
+//         UploadCurrMap();
+//     }
+// }
 
 const string MapStatusText() {
     switch (currMapStatus) {
@@ -195,7 +195,7 @@ void UploadCurrMap() {
 /** Called when a setting in the settings panel was changed.
 */
 void OnSettingsChanged() {
-    if (currMapStatus == MapStatus::NotUploaded && S_AutoUpload) {
-        startnew(WaitForCheckAndAutoUploadIfNotUploaded);
-    }
+    // if (currMapStatus == MapStatus::NotUploaded && S_AutoUpload) {
+    //     startnew(WaitForCheckAndAutoUploadIfNotUploaded);
+    // }
 }
