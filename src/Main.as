@@ -43,7 +43,8 @@ enum MapStatus {
     Uploaded,
     NotUploaded,
     Unknown,
-    Editing
+    Editing,
+    NoUpload
 }
 
 MapStatus currMapStatus = MapStatus::NotChecked;
@@ -55,10 +56,19 @@ void UpdateMapStatus() {
     sleep(100);
     currMapStatus = MapStatus::Checking;
     auto app = cast<CGameManiaPlanet>(GetApp());
-    if (app.Editor !is null) {
+    if (cast<CGameCtnEditorFree>(app.Editor) !is null) {
         currMapStatus = MapStatus::Editing;
         return;
     }
+    bool solo = app.PlaygroundScript !is null;
+    auto si = cast<CGameCtnNetServerInfo>(app.Network.ServerInfo);
+    bool serverDownload = si.IsMapDownloadAllowed;
+
+    if (!solo && !serverDownload) {
+        currMapStatus = MapStatus::NoUpload;
+        return;
+    }
+
     while (app.MenuManager is null || app.MenuManager.MenuCustom_CurrentManiaApp is null) yield();
     auto mccma = app.MenuManager.MenuCustom_CurrentManiaApp;
     while (mccma.DataFileMgr is null || mccma.UserMgr is null || mccma.UserMgr.Users.Length < 1) yield();
@@ -101,6 +111,7 @@ const string MapStatusText() {
         case MapStatus::NotUploaded: return "\\$<\\$2f2" + Icons::Upload + "\\$>";
         case MapStatus::Unknown: return Icons::Exclamation;
         case MapStatus::Editing: return Icons::Pencil;
+        case MapStatus::NoUpload: return Icons::Ban;
     }
     return "??";
 }

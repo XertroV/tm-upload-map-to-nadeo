@@ -11,3 +11,5 @@ Suggestions/feedback: @XertroV on Openplanet discord
 Code/issues: [https://github.com/XertroV/tm-upload-map-to-nadeo](https://github.com/XertroV/tm-upload-map-to-nadeo)
 
 GL HF
+
+<!-- - Add auto upload + setting (thanks @Greep for the PR) -->
